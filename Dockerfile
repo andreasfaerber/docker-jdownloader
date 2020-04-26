@@ -30,4 +30,4 @@ EXPOSE 3129
 WORKDIR /opt/JDownloader
 
 
-CMD ["/opt/JDownloader/daemon.sh"]
+CMD ["/opt/JDownloader/daemon_loop.sh"]
