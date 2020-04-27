@@ -1,7 +1,5 @@
-# sudo for docker
-sudo: true
 dist: xenial
-
+sudo: true
 language: bash
 
 services:
@@ -15,33 +13,32 @@ addons:
 env:
   global:
     - DOCKER_REPO=andreasfaerber/jaymoulin-jdownloader
+    - PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7"
 
-# Only clone the most recent commit.
-git:
-  depth: 1
+before_deploy:
+  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 
-# install qemu-user before running docker build
 before_install:
-  - sudo docker run --privileged linuxkit/binfmt:v0.6
-  - sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform linux/armhf --oci-worker-platform linux/arm64
-  - sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/
-  - export BUILDKIT_HOST=tcp://0.0.0.0:1234
+  - docker container run --rm --privileged multiarch/qemu-user-static --reset -p yes
+  - docker container run -d --rm --name buildkitd --privileged moby/buildkit:latest
+  - sudo docker container cp buildkitd:/usr/bin/buildctl /usr/local/bin/
+  - export BUILDKIT_HOST="docker-container://buildkitd"
 
+install:
+  - buildctl build \
+              --progress=plain \
+              --frontend=dockerfile.v0 \
+              --local context=. \
+              --local dockerfile=. \
+              --opt filename=contrib/docker/Dockerfile \
+              --opt platform=$PLATFORMS \
+              --opt build-arg:VERSION=\"master\" \
+              --opt build-arg:GITSHA=\"$TRAVIS_COMMIT\" \
+              --output type=image,\"name=$DOCKER_REPO:git-master\",push=true
 
-# Skip the install step. Don't `go get` dependencies. Only build with the code
-# in vendor/
-install: true
-
-script:
-  - bash ./travis/build.sh
-  - bash ./travis/test.sh
-
-deploy:
-  provider: script
-  script: bash ./travis/deploy.sh
-  skip_cleanup: true
-  on:
-    tags: true
+after_failure:
+  - buildctl debug workers ls
+  - docker container logs buildkitd
 
 notifications:
   email: false
