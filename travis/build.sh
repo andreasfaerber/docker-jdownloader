@@ -15,14 +15,13 @@ done
 
 platforms=${platforms::-1}
 
-#      --frontend dockerfile.v0 \
 # Push multi-arch image
 buildctl build \
+      --frontend dockerfile.v0 \
       --local dockerfile=. \
       --local context=. \
       --exporter image \
-      --exporter-opt name=hub.docker.com/$DOCKER_REPO:test-build \
-      --exporter-opt push=true \
+      --output type=image,opt=name=hub.docker.com/$DOCKER_REPO:test-build,push=true \
       --frontend-opt platform=$platforms \
       --frontend-opt filename=./Dockerfile.cross
 
@@ -30,13 +29,11 @@ buildctl build \
 for arch in $architectures
 do
 # Build for all architectures and push manifest
-#      --frontend dockerfile.v0 \
   buildctl build \
+      --frontend dockerfile.v0 \
       --local dockerfile=. \
       --local context=. \
-      --exporter image \
-      --exporter-opt name=docker.io/$DOCKER_REPO:test-build-$arch \
-      --exporter-opt push=true \
+      --output type=image,opt=name=docker.io/$DOCKER_REPO:test-build-$arch,push=true \
       --frontend-opt platform=linux/$arch \
       --frontend-opt filename=./Dockerfile.cross &
 done

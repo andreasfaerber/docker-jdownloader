@@ -2,10 +2,7 @@
 sudo: true
 dist: xenial
 
-language: go
-
-go:
-  - 1.10.4
+language: bash
 
 services:
   - docker
