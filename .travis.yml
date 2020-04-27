@@ -1,35 +1,17 @@
-dist: xenial
-sudo: true
 language: bash
-
-services:
-  - docker
-
-addons:
-  apt:
-    packages:
-      - docker-ce
-
+os: linux
+dist: xenial
 env:
   global:
     - DOCKER_REPO=andreasfaerber/jaymoulin-jdownloader
-    - PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7"
-
-before_deploy:
-  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-
 before_install:
-  - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-  - docker run -d -p 1234:1234 --rm --name buildkitd --privileged moby/buildkit:latest --addr tcp://0.0.0.0:1234
-  - sudo docker cp buildkitd:/usr/bin/buildctl /usr/bin/
-  - export BUILDKIT_HOST="tcp://0.0.0.0:1234"
-
+  - curl -fsSL https://get.docker.com | sh
+  - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
+  - mkdir -p $HOME/.docker
+  - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
+  - sudo service docker start
 install:
-  - buildctl build --progress=plain --frontend=dockerfile.v0 --local context=. --local dockerfile=. --opt filename=Dockerfile --opt platform=$PLATFORMS --opt build-arg:VERSION=\"master\" --opt build-arg:GITSHA=\"$TRAVIS_COMMIT\" --output type=image,\"name=$DOCKER_REPO:git-master\",push=true
+  - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+  - docker buildx create --name xbuilder --use
+script: bash ci.sh
 
-after_failure:
-  - buildctl debug workers ls
-  - docker container logs buildkitd
-
-notifications:
-  email: false
