@@ -1,5 +1,6 @@
 #!/bin/sh
 
+cd /opt/JDownloader
 if [ ! -f /opt/JDownloader/.initialized ]; then
   cp -av /opt/JDownloader_install/* /opt/JDownloader/
 fi
