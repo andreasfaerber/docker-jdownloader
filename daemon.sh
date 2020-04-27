@@ -1,8 +1,13 @@
 #!/bin/sh
 
+if [ ! -f /opt/JDownloader/.initialized ]; then
+  cp -av /opt/JDownloader_install/* /opt/JDownloader/
+fi
+
 trap 'kill -TERM $PID' TERM INT
 rm -f /opt/JDownloader/JDownloader.jar.*
 rm -f /opt/JDownloader/JDownloader.pid
+rm -f /opt/JDownloader/core
 
 if [ ! -z "$MYJD_USER" ] && [ ! -z "$MYJD_PASSWORD" ]; then
     configure "$MYJD_USER" "$MYJD_PASSWORD"
@@ -34,6 +39,8 @@ if [ ! -f /opt/JDownloader/JDownloader.jar ]; then
     wget -O /opt/JDownloader/JDownloader.jar "http://installer.jdownloader.org/JDownloader.jar?$RANDOM"
     chmod +x /opt/JDownloader/JDownloader.jar
 fi
+
+touch /opt/JDownloader/.initialized
 
 java -Djava.awt.headless=true -jar /opt/JDownloader/JDownloader.jar -norestart &
 PID=$!
