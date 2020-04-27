@@ -15,8 +15,9 @@ done
 
 platforms=${platforms::-1}
 
+#      --frontend dockerfile.v0 \
 # Push multi-arch image
-buildctl build --frontend dockerfile.v0 \
+buildctl build \
       --local dockerfile=. \
       --local context=. \
       --exporter image \
@@ -29,7 +30,8 @@ buildctl build --frontend dockerfile.v0 \
 for arch in $architectures
 do
 # Build for all architectures and push manifest
-  buildctl build --frontend dockerfile.v0 \
+#      --frontend dockerfile.v0 \
+  buildctl build \
       --local dockerfile=. \
       --local context=. \
       --exporter image \
