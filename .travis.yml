@@ -19,8 +19,8 @@ before_deploy:
   - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 
 before_install:
-  - docker container run --rm --privileged multiarch/qemu-user-static --reset -p yes
-  - docker container run -d -p 1234:1234 --rm --name buildkitd --privileged moby/buildkit:latest --addr tcp://0.0.0.0:1234
+  - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+  - docker run -d -p 1234:1234 --rm --name buildkitd --privileged moby/buildkit:latest --addr tcp://0.0.0.0:1234
   - sudo docker cp buildkitd:/usr/bin/buildctl /usr/bin/
   - export BUILDKIT_HOST="tcp://0.0.0.0:1234"
 
