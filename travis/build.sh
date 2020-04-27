@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Login into docker
-docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
+docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
 
 architectures="arm arm64 amd64"
 images=""
