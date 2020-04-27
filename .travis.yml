@@ -25,16 +25,7 @@ before_install:
   - export BUILDKIT_HOST="docker-container://buildkitd"
 
 install:
-  - buildctl build \
-              --progress=plain \
-              --frontend=dockerfile.v0 \
-              --local context=. \
-              --local dockerfile=. \
-              --opt filename=contrib/docker/Dockerfile \
-              --opt platform=$PLATFORMS \
-              --opt build-arg:VERSION=\"master\" \
-              --opt build-arg:GITSHA=\"$TRAVIS_COMMIT\" \
-              --output type=image,\"name=$DOCKER_REPO:git-master\",push=true
+  - buildctl build --progress=plain --frontend=dockerfile.v0 --local context=. --local dockerfile=. --opt filename=contrib/docker/Dockerfile --opt platform=$PLATFORMS --opt build-arg:VERSION=\"master\" --opt build-arg:GITSHA=\"$TRAVIS_COMMIT\" --output type=image,\"name=$DOCKER_REPO:git-master\",push=true
 
 after_failure:
   - buildctl debug workers ls
